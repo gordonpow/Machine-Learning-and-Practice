@@ -1,5 +1,5 @@
 # 📌 Project Overview
-
+https://youtu.be/uMm5tCExLoE
 本專題使用 **Double Deep Q-Network (DDQN)** 訓練一款自製的 **三消遊戲（Match-3 Game）**。  
 遊戲具有 **重力、隨機插入寶石、牆壁生成、游標移動、交換寶石** 等特殊規則，比一般 match-3 更複雜。
 
