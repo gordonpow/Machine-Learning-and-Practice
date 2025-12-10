@@ -154,12 +154,15 @@ $$L_t^{Total}(\theta) = \underbrace{- L_t^{CLIP}(\theta)}_{\text{Policy Loss}} +
 ---
 #每局消去數曲線
 ![image](https://github.com/gordonpow/Machine-Learning-and-Practice/blob/555045e1db3cf0f989c0c35860f87b3a40a3c91d/jewel_ai/DDQN/cleared.png)
+
 ---
 #每局步數長度
 ![image](https://github.com/gordonpow/Machine-Learning-and-Practice/blob/16a759fa3007ab742037fe999f73480b1493e373/jewel_ai/DDQN/length.png)
+
 ---
 #loss曲線
 ![image](https://github.com/gordonpow/Machine-Learning-and-Practice/blob/16a759fa3007ab742037fe999f73480b1493e373/jewel_ai/DDQN/loss.png)
+
 ---
 #reward曲線
 ![image](https://github.com/gordonpow/Machine-Learning-and-Practice/blob/16a759fa3007ab742037fe999f73480b1493e373/jewel_ai/DDQN/reward.png)
