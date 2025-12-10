@@ -160,3 +160,14 @@ $$L_t^{Total}(\theta) = \underbrace{- L_t^{CLIP}(\theta)}_{\text{Policy Loss}} +
 ### ⚠ 如果牆壁被推到最頂端？
 - 若牆壁到達最上層，遊戲將 **無法再插入新行**  
 - 玩家需要優先處理牆壁，不然很容易 **Game Over**
+
+---
+![image](jewel_ai/DDQN/cleared.png)
+
+
+
+
+
+
+
+
