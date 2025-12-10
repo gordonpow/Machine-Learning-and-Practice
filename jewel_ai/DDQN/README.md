@@ -47,19 +47,40 @@ $$L_t^{Total}(\theta) = \underbrace{- L_t^{CLIP}(\theta)}_{\text{Policy Loss}} +
 
 ### 3. 運作流程圖 (Data Flow)
 
-```mermaid
-graph LR
-    E[環境 Environment] -->|State| A[Actor 網路]
-    E -->|State| C[Critic 網路]
-    A -->|Action & LogProb| B[Replay Buffer]
-    C -->|Value| B
-    E -->|Reward| B
+flowchart TD
+    Start([🚀 開始訓練: train_Multitasking.py]) --> Init[初始化: 24 個並行環境 & PPO Agent]
+    Init --> InitTracker[初始化動作追蹤器\ntracker_last_actions = -1]
     
-    subgraph PPO Update Process
-    B -->|Batch Data| CALC[計算 Advantage & Return]
-    CALC -->|GAE| OPT[優化器 Optimizer]
-    OPT -->|Backprop| A
-    OPT -->|Backprop| C
+    subgraph Training_Loop [並行訓練迴圈]
+        direction TB
+        
+        CheckEnd{達到最大局數?} -- Yes --> Finish([🏆 訓練結束 & 關閉環境])
+        CheckEnd -- No --> MakeMask[製作 Mask]
+        
+        subgraph Anti_Reversal_Logic [🛡️ 反悔屏蔽機制]
+            MakeMask --> CheckTrack{上一步有無效動作?}
+            CheckTrack -- Yes --> BanAction[❌ 將該動作 Mask 設為 0\n(禁止反悔/原地跳恰恰)]
+            CheckTrack -- No --> AllowAll[✅ Mask 全設為 1\n(允許所有動作)]
+        end
+        
+        BanAction & AllowAll --> SelectAction[🤖 Agent 選擇動作\n(一次輸出 24 個 Actions)]
+        SelectAction --> EnvStep[⚡ 24 個環境同時執行 Step]
+        EnvStep --> UpdateTracker{檢查結果:\n1. 沒消除?\n2. 沒死?\n3. 非 Upload?}
+        
+        UpdateTracker -- Yes (無效移動) --> RecordBan[📝 記錄此動作\n(下一步將被 Ban)]
+        UpdateTracker -- No (有效/死亡) --> ResetBan[🆓 重置記錄為 -1\n(還它自由)]
+        
+        RecordBan & ResetBan --> StoreBuffer[💾 存入 Buffer\n(State, Action, Reward...)]
+        
+        StoreBuffer --> CheckUpdate{Buffer 滿 2000 步?}
+        
+        CheckUpdate -- Yes --> PPO_Update[[🔄 PPO 更新網路]]
+        PPO_Update --> SaveCheck{每 10 次更新?}
+        SaveCheck -- Yes --> SaveModel[💾 儲存模型 checkpoint]
+        SaveCheck -- No --> CheckEnd
+        SaveModel --> CheckEnd
+        
+        CheckUpdate -- No --> CheckEnd
     end
 
 
