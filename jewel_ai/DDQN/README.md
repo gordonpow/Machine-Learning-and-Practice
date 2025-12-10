@@ -62,39 +62,29 @@ $$L_t^{Total}(\theta) = \underbrace{- L_t^{CLIP}(\theta)}_{\text{Policy Loss}} +
 ## 🧩 Board Specification
 
 - 棋盤大小：**9 × 6**
-- 共有 **8 個 one-hot 通道** → shape = **(9, 6, 8)**
+- 共有 **9 個 one-hot 通道** → shape = **(9, 6, 9)**
 
 ### Layer 含義
 
 | Layer Index | Meaning |
 |-------------|----------|
-| 0 | 寶石 1 |
-| 1 | 寶石 2 |
-| 2 | 寶石 3 |
-| 3 | 寶石 4 |
-| 4 | 寶石 5 |
-| 5 | 寶石 6 |
-| 6 | 寶石 7 |
-| 7 | 牆壁 |
-| 8 | 游標位置 |
+| 0 | 寶石 0 |
+| 1 | 寶石 1 |
+| 2 | 寶石 2 |
+| 3 | 寶石 3 |
+| 4 | 寶石 4 |
+| 5 | 寶石 5 |
+| 6 | 寶石 6 |
+| 7 | 牆壁 7 |
+| 8 | 牆壁 8 |
 
-> 💡 **補充**  
-> 雖然原本定義 9×6×8，但實際上還多一層游標資訊，可依需求調整為 **9×6×9**。
-
----
 
 ## 🎮 Actions (動作空間)
 
-總共 **6 個動作**：
+總共 **46 個動作**：
 
-| Action ID | Description |
-|-----------|-------------|
-| 0 | 無動作 (No-op) |
-| 1 | 游標上移 |
-| 2 | 游標下移 |
-| 3 | 游標左移 |
-| 4 | 游標右移 |
-| 5 | 點擊（與右邊寶石互換） |
+45個點擊位置
+一個upload
 
 ---
 
@@ -162,11 +152,17 @@ $$L_t^{Total}(\theta) = \underbrace{- L_t^{CLIP}(\theta)}_{\text{Policy Loss}} +
 - 玩家需要優先處理牆壁，不然很容易 **Game Over**
 
 ---
+#每局消去數曲線
 ![image](https://github.com/gordonpow/Machine-Learning-and-Practice/blob/555045e1db3cf0f989c0c35860f87b3a40a3c91d/jewel_ai/DDQN/cleared.png)
-
-
-
-
+---
+#每局步數長度
+![image](https://github.com/gordonpow/Machine-Learning-and-Practice/blob/16a759fa3007ab742037fe999f73480b1493e373/jewel_ai/DDQN/length.png)
+---
+#loss曲線
+![image](https://github.com/gordonpow/Machine-Learning-and-Practice/blob/16a759fa3007ab742037fe999f73480b1493e373/jewel_ai/DDQN/loss.png)
+---
+#reward曲線
+![image](https://github.com/gordonpow/Machine-Learning-and-Practice/blob/16a759fa3007ab742037fe999f73480b1493e373/jewel_ai/DDQN/reward.png)
 
 
 
