@@ -153,7 +153,7 @@ $$L_t^{Total}(\theta) = \underbrace{- L_t^{CLIP}(\theta)}_{\text{Policy Loss}} +
 
 ---
 ## 系統BreakDown
-![image](https://github.com/gordonpow/Machine-Learning-and-Practice/blob/main/jewel_ai/DDQN/BD%E5%9C%962.jpg?raw=true)
+![image](https://github.com/gordonpow/Machine-Learning-and-Practice/blob/main/jewel_ai/DDQN/BD%E5%9C%963.jpg?raw=true)
 ![image](https://github.com/gordonpow/Machine-Learning-and-Practice/blob/main/jewel_ai/DDQN/BD%E5%9C%96AI1.jpg?raw=true)
 ---
 #每局消去數曲線
