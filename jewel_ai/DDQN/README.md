@@ -152,6 +152,9 @@ $$L_t^{Total}(\theta) = \underbrace{- L_t^{CLIP}(\theta)}_{\text{Policy Loss}} +
 - 玩家需要優先處理牆壁，不然很容易 **Game Over**
 
 ---
+## 系統BreakDown
+![image](https://github.com/gordonpow/Machine-Learning-and-Practice/blob/main/BD%E5%9C%961.jpg)
+---
 #每局消去數曲線
 ![image](https://github.com/gordonpow/Machine-Learning-and-Practice/blob/555045e1db3cf0f989c0c35860f87b3a40a3c91d/jewel_ai/DDQN/cleared.png)
 
