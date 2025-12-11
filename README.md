@@ -146,7 +146,7 @@ DDQN 的 Loss 同樣旨在最小化 TD 誤差的期望 E[(TD Error)^2]，但透�
 三者的 Loss 都是 **最小化 TD 誤差平方的期望**，只是 TD-Target 的計算方式越來越精確，從而讓 Q 值估計更準確、代理表現更好。
 
 ## 系統架構拆解
-![image]([https://github.com/gordonpow/Machine-Learning-and-Practice/blob/main/jewel_ai/DDQN/Screenshot%202025-11-27%20123559.png?raw=true](https://github.com/gordonpow/Machine-Learning-and-Practice/blob/main/BD%E5%9C%961.jpg?raw=true))
+![image](https://github.com/gordonpow/Machine-Learning-and-Practice/blob/main/BD%E5%9C%961.jpg)
 
 
 
