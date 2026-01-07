@@ -182,7 +182,6 @@ graph TD
 
     Root --> Env
     Root --> Algo
-    Root --> Expert
     Root --> Train
     Root --> UI
 
