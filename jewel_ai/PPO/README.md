@@ -226,7 +226,7 @@ graph TD
 | **類別名稱** | `Match3ActorCritic(nn.Module)` |
 | **輸入 (Input)** | **狀態張量 (State Tensor)** <br> - 形狀：`(Batch_Size, 10, 9, 6)` <br> - 內容：前 9 層為寶石 One-Hot 編碼，第 10 層為 Action Mask。 |
 | **輸出 (Output)** | **1. 動作分佈 (Action Logits)** <br> - 形狀：`(Batch_Size, 54)` <br> - 說明：對應 54 種離散動作的未歸一化機率。<br><br>**2. 狀態價值 (State Value)** <br> - 形狀：`(Batch_Size, 1)` <br> - 說明：預測當前盤面的獲勝機率或預期得分。 |
-| **核心參數** | - `input_shape`: `(10, 9, 6)` <br> - `num_actions`: `54` (53種交換 + 1種上傳) |
+| **核心參數** | - `input_shape`: `(10, 9, 6)` <br> - `num_actions`: `54` (53種交換 + 1種upload) |
 | **主要方法** | - `forward()`: (未實作，主要使用 act/evaluate) <br> - `act(state, mask)`: 推論模式，回傳動作與 Log Prob。 <br> - `evaluate(state, action)`: 訓練模式，回傳 Log Prob, Value 與 Entropy。 |
 | **架構特點** | - **CNN Backbone**: 3 層卷積層提取局部紋理。 <br> - **Self-Attention**: 計算全域關聯矩陣 (N, N)，捕捉遠距離連鎖特徵。 |
 
