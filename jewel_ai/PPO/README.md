@@ -285,6 +285,33 @@ graph TD
 | **核心參數** | - `reward_mode`: `"advanced"` (推薦使用進階獎勵) <br> - `wall_timer`: 隨機牆壁生成的倒數計時器 |
 | **主要方法** | - `step(action)`: 執行一步模擬，包含交換、消除、掉落、生成牆壁。 <br> - `reset()`: 重置棋盤，隨機生成初始局面。 <br> - `render()`: (選用) 視覺化當前盤面。 |
 
+### 5. 多核心環境管理器 (Multiprocessing Environment)
+**檔案名稱：** `train_ppo_multicore.py`
+
+負責管理多個獨立運行的遊戲環境進程，利用 `multiprocessing` 實現並行數據收集，是加速訓練的關鍵組件。
+
+| 項目 | 說明 |
+| :--- | :--- |
+| **類別名稱** | `SubprocVecEnv` |
+| **輸入 (Init)** | `num_envs`: 整數 (int) <br> - 說明：指定同時開啟的環境數量 (例如 18)。 |
+| **輸出 (Output)** | 環境管理器實例 (Instance) |
+| **主要方法** | - **`step(actions)`**: 同步對所有子環境執行動作。 <br> &nbsp;&nbsp; **輸入**: `actions` (List[int])，長度需等於 `num_envs`。 <br> &nbsp;&nbsp; **輸出**: `obs`, `rewards`, `dones`, `infos`, `solver_acts` (皆為堆疊後的 Numpy Array)。 <br><br> - **`reset()`**: 重置所有子環境。 <br> &nbsp;&nbsp; **輸出**: `obs` (初始狀態), `solver_acts` (專家建議)。 |
+| **運作機制** | 透過 `mp.Pipe` 建立父子進程通訊管道。主進程發送 `('step', action)` 指令，Worker 進程執行後回傳結果字典。 |
+
+### 6. 測試與驗證模組 (Testing Interface)
+**檔案名稱：** `test_model.py`
+
+用於載入訓練完成的模型權重 (`.pth`)，進行視覺化推論與效能評估。
+
+| 項目 | 說明 |
+| :--- | :--- |
+| **函式名稱** | `test()` |
+| **輸入 (Config)** | - `MODEL_PATH`: 預訓練模型的檔案路徑。 <br> - `INPUT_SHAPE`: `(10, 9, 6)`，需與訓練時一致。 <br> - `RENDER_DELAY`: 動作顯示的延遲時間 (秒)，便於肉眼觀察。 |
+| **輸出 (Console)** | - **即時資訊**: 每一步的動作類型 (Swap/Upload)、獎勵、消除數。 <br> - **統計摘要**: 測試結束後的平均分數與平均消除寶石數。 |
+| **功能流程** | 1. **環境初始化**: 建立 `JewelEnv` (通常使用 `simple` 獎勵模式)。 <br> 2. **模型載入**: 實例化 `PPOAgent` 並讀取 `state_dict`。 <br> 3. **推論迴圈**: 執行 `agent.select_action` -> `env.step` -> `env.render`。 <br> 4. **評估**: 計算 `Total Reward` 與 `Total Cleared`。 |
+
+---
+
 
 ### 🎥 實際遊玩演示 (GIF)
 
