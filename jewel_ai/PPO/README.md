@@ -177,7 +177,6 @@ graph TD
     %% 第一層
     Env[環境 Environment<br>GAME_jewel_env_blacklist.py]:::env
     Algo[演算法 Algorithm<br>PPO_Agent_Multitasking.py]:::algo
-    Expert[專家系統 Expert System<br>BFS_Solver_multiprocessing.py]:::expert
     Train[訓練架構 Training<br>train_ppo_multicore.py]:::train
     UI[應用介面 Application<br>gui_simulator.py]:::ui
 
