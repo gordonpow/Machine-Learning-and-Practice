@@ -153,7 +153,9 @@ $$L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min(r_t(\theta)\hat{A}_t, \text{
 為了確保模型在長時間訓練下的穩定性，我們實作了 **自適應學習率 (ReduceLROnPlateau)**。系統會持續監控「平均分數」，當 AI 進步停滯時自動降低學習率，進行更精細的優化。
 
 ---
-
+## 4. Breakdown
+ ![breakdown](img/breakdown.png)
+---
 ## 4. 訓練成果展示
 
 經過 1000 萬步 (約 24 小時) 的訓練，AI 展現出了驚人的策略演化：
