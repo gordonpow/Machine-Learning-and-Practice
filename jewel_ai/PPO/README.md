@@ -227,7 +227,16 @@ graph TD
 
 本專案核心模組的詳細 API 介面說明。
 
-### 1. 神經網路模型 (Neural Network)
+- [6.1 神經網路模型 (Neural Network)](#61-神經網路模型-neural-network)
+- [6.2 PPO 代理 (Reinforcement Learning Agent)](#62-ppo-代理-reinforcement-learning-agent)
+- [6.3 遊戲環境 (Environment)](#63-遊戲環境-environment)
+- [6.4 專家系統 (Expert Solver)](#64-專家系統-expert-solver)
+- [6.5 多核心環境管理器 (Multiprocessing Environment)](#65-多核心環境管理器-multiprocessing-environment)
+- [6.6 測試與驗證模組 (Testing Interface)](#66-測試與驗證模組-testing-interface)
+
+---
+
+### 6.1 神經網路模型 (Neural Network)
 **檔案名稱：** `ActorCritic_Multitasking.py`
 負責處理視覺特徵提取與決策生成的深度學習模型。
 
@@ -236,11 +245,11 @@ graph TD
 | **類別名稱** | `Match3ActorCritic(nn.Module)` |
 | **輸入 (Input)** | **狀態張量 (State Tensor)** <br> - 形狀：`(Batch_Size, 10, 9, 6)` <br> - 內容：前 9 層為寶石 One-Hot 編碼，第 10 層為 Action Mask。 |
 | **輸出 (Output)** | **1. 動作分佈 (Action Logits)** <br> - 形狀：`(Batch_Size, 54)` <br> - 說明：對應 54 種離散動作的未歸一化機率。<br><br>**2. 狀態價值 (State Value)** <br> - 形狀：`(Batch_Size, 1)` <br> - 說明：預測當前盤面的獲勝機率或預期得分。 |
-| **核心參數** | - `input_shape`: `(10, 9, 6)` <br> - `num_actions`: `54` (53種交換 + 1種upload) |
+| **核心參數** | - `input_shape`: `(10, 9, 6)` <br> - `num_actions`: `54` (53種交換 + 1種上傳) |
 | **主要方法** | - `forward()`: (未實作，主要使用 act/evaluate) <br> - `act(state, mask)`: 推論模式，回傳動作與 Log Prob。 <br> - `evaluate(state, action)`: 訓練模式，回傳 Log Prob, Value 與 Entropy。 |
 | **架構特點** | - **CNN Backbone**: 3 層卷積層提取局部紋理。 <br> - **Self-Attention**: 計算全域關聯矩陣 (N, N)，捕捉遠距離連鎖特徵。 |
 
-### 2. PPO 代理 (Reinforcement Learning Agent)
+### 6.2 PPO 代理 (Reinforcement Learning Agent)
 **檔案名稱：** `PPO_Agent_Multitasking.py`
 負責與環境互動、收集數據並執行 PPO 演算法更新的代理人。
 
@@ -252,7 +261,7 @@ graph TD
 | **核心參數** | - `lr`: 學習率 (搭配 Scheduler 使用) <br> - `gamma`: 折扣因子 (預設 0.99) <br> - `eps_clip`: PPO 截斷範圍 (預設 0.2) <br> - `k_epochs`: 每次更新的循環次數 (預設 4) |
 | **主要方法** | - `select_action(state)`: 將狀態轉為 Tensor 並從策略網路採樣動作。 <br> - `update()`: 取出 Buffer 中的軌跡數據，計算 Advantage 並執行梯度下降更新。 |
 
-### 3. 遊戲環境 (Environment)
+### 6.3 遊戲環境 (Environment)
 **檔案名稱：** `GAME_jewel_env_blacklist.py`
 遵循 OpenAI Gym 介面的遊戲模擬器，負責邏輯運算與物理模擬。
 
@@ -264,34 +273,40 @@ graph TD
 | **核心參數** | - `reward_mode`: `"advanced"` (推薦使用進階獎勵) <br> - `wall_timer`: 隨機牆壁生成的倒數計時器 |
 | **主要方法** | - `step(action)`: 執行一步模擬，包含交換、消除、掉落、生成牆壁。 <br> - `reset()`: 重置棋盤，隨機生成初始局面。 <br> - `render()`: (選用) 視覺化當前盤面。 |
 
-### 5. 多核心環境管理器 (Multiprocessing Environment)
-**檔案名稱：** `train_ppo_multicore.py`
+### 6.4 專家系統 (Expert Solver)
+**檔案名稱：** `BFS_Solver_multiprocessing.py`
+基於啟發式搜索的輔助系統，用於 Teacher Forcing 階段引導 AI。
 
-負責管理多個獨立運行的遊戲環境進程，利用 `multiprocessing` 實現並行數據收集，是加速訓練的關鍵組件。
+| 項目 | 說明 |
+| :--- | :--- |
+| **類別名稱** | `JewelSolver` |
+| **輸入 (Input)** | - **當前盤面 (Board)**: `(9, 6)` 整數矩陣 <br> - **遮罩 (Mask)**: 標記無效操作的位置 |
+| **輸出 (Output)** | **最佳動作列表 (Best Actions)** <br> - 格式：`[Action_ID_1, Action_ID_2, ...]` <br> - 說明：回傳評分最高的一系列動作。 |
+| **核心參數** | - `max_depth`: 搜尋深度 (預設 2~3) <br> - `weights`: 權重設定 (破牆、5消、4消的分數比重) |
+| **主要方法** | - `solve(board)`: 執行 BFS/Beam Search，回傳最佳解。 <br> - `evaluate_board()`: 靜態評估函數，計算盤面價值。 |
+
+### 6.5 多核心環境管理器 (Multiprocessing Environment)
+**檔案名稱：** `train_ppo_multicore.py`
+負責管理多個獨立運行的遊戲環境進程，利用 `multiprocessing` 實現並行數據收集。
 
 | 項目 | 說明 |
 | :--- | :--- |
 | **類別名稱** | `SubprocVecEnv` |
 | **輸入 (Init)** | `num_envs`: 整數 (int) <br> - 說明：指定同時開啟的環境數量 (例如 18)。 |
 | **輸出 (Output)** | 環境管理器實例 (Instance) |
-| **主要方法** | - **`step(actions)`**: 同步對所有子環境執行動作。 <br> &nbsp;&nbsp; **輸入**: `actions` (List[int])，長度需等於 `num_envs`。 <br> &nbsp;&nbsp; **輸出**: `obs`, `rewards`, `dones`, `infos`, `solver_acts` (皆為堆疊後的 Numpy Array)。 <br><br> - **`reset()`**: 重置所有子環境。 <br> &nbsp;&nbsp; **輸出**: `obs` (初始狀態), `solver_acts` (專家建議)。 |
-| **運作機制** | 透過 `mp.Pipe` 建立父子進程通訊管道。主進程發送 `('step', action)` 指令，Worker 進程執行後回傳結果字典。 |
+| **主要方法** | - `step(actions)`: 同步對所有子環境執行動作。 <br> - `reset()`: 重置所有子環境。 |
 
-### 6. 測試與驗證模組 (Testing Interface)
+### 6.6 測試與驗證模組 (Testing Interface)
 **檔案名稱：** `test_model.py`
-
-用於載入訓練完成的模型權重 (`.pth`)，進行視覺化推論與效能評估。
+用於載入訓練完成的模型權重，進行視覺化推論與效能評估。
 
 | 項目 | 說明 |
 | :--- | :--- |
 | **函式名稱** | `test()` |
-| **輸入 (Config)** | - `MODEL_PATH`: 預訓練模型的檔案路徑。 <br> - `INPUT_SHAPE`: `(10, 9, 6)`，需與訓練時一致。 <br> - `RENDER_DELAY`: 動作顯示的延遲時間 (秒)，便於肉眼觀察。 |
-| **輸出 (Console)** | - **即時資訊**: 每一步的動作類型 (Swap/Upload)、獎勵、消除數。 <br> - **統計摘要**: 測試結束後的平均分數與平均消除寶石數。 |
-| **功能流程** | 1. **環境初始化**: 建立 `JewelEnv` (通常使用 `simple` 獎勵模式)。 <br> 2. **模型載入**: 實例化 `PPOAgent` 並讀取 `state_dict`。 <br> 3. **推論迴圈**: 執行 `agent.select_action` -> `env.step` -> `env.render`。 <br> 4. **評估**: 計算 `Total Reward` 與 `Total Cleared`。 |
-
+| **輸入 (Config)** | - `MODEL_PATH`: 預訓練模型的檔案路徑。 <br> - `INPUT_SHAPE`: `(10, 9, 6)`。 <br> - `RENDER_DELAY`: 動作顯示的延遲時間。 |
+| **輸出 (Console)** | - **即時資訊**: 每一步的動作類型與獎勵。 <br> - **統計摘要**: 平均分數與平均消除數。 |
 
 ---
-
 
 ## 7. 訓練成果展示
 
