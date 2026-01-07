@@ -156,7 +156,80 @@ $$L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min(r_t(\theta)\hat{A}_t, \text{
 ## 4. Breakdown
  ![breakdown](img/breakdown.png)
 ---
-## 4. 訓練成果展示
+# Jewel Puzzle AI 系統架構
+
+這是我專案的系統架構圖：
+
+```mermaid
+graph TD
+    %% 定義樣式
+    classDef root fill:#2c3e50,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef env fill:#e67e22,stroke:#d35400,stroke-width:2px,color:#fff;
+    classDef algo fill:#2980b9,stroke:#3498db,stroke-width:2px,color:#fff;
+    classDef expert fill:#27ae60,stroke:#2ecc71,stroke-width:2px,color:#fff;
+    classDef train fill:#8e44ad,stroke:#9b59b6,stroke-width:2px,color:#fff;
+    classDef ui fill:#f1c40f,stroke:#f39c12,stroke-width:2px,color:#fff;
+    classDef sub fill:#ecf0f1,stroke:#bdc3c7,stroke-width:1px,color:#333;
+
+    %% 根節點
+    Root[Jewel Puzzle AI Project]:::root
+
+    %% 第一層
+    Env[環境 Environment<br>GAME_jewel_env_blacklist.py]:::env
+    Algo[演算法 Algorithm<br>PPO_Agent_Multitasking.py]:::algo
+    Expert[專家系統 Expert System<br>BFS_Solver_multiprocessing.py]:::expert
+    Train[訓練架構 Training<br>train_ppo_multicore.py]:::train
+    UI[應用介面 Application<br>gui_simulator.py]:::ui
+
+    Root --> Env
+    Root --> Algo
+    Root --> Expert
+    Root --> Train
+    Root --> UI
+
+    %% 環境細節
+    Env --> State[狀態定義 State]:::sub
+    State --> OneHot[10層 One-Hot 編碼<br>寶石/牆壁/遮罩]:::sub
+    Env --> Logic[遊戲邏輯 Logic]:::sub
+    Logic --> Rules[消除/連鎖/重力]:::sub
+    Logic --> Wall[隨機牆壁生成]:::sub
+    Env --> Reward[獎勵機制 Reward]:::sub
+    Reward --> R_Calc[消除分/破牆分/懲罰]:::sub
+
+    %% 演算法細節
+    Algo --> Network[神經網路 Match3ActorCritic]:::sub
+    Network --> CNN[CNN 卷積層<br>特徵提取]:::sub
+    Network --> Attention[Self-Attention<br>全域關聯]:::sub
+    Network --> Heads[輸出層 Heads]:::sub
+    Heads --> Actor[Actor 策略網路]:::sub
+    Heads --> Critic[Critic 價值網路]:::sub
+    Algo --> Opt[優化機制]:::sub
+    Opt --> PPO[PPO Clip Update]:::sub
+    Opt --> LR[自適應學習率<br>ReduceLROnPlateau]:::sub
+
+    %% 專家系統細節
+    Expert --> Search[搜尋演算法]:::sub
+    Search --> BFS[BFS / Beam Search]:::sub
+    Expert --> Heuristic[啟發式評估]:::sub
+    Heuristic --> Tactics[戰術分析<br>破牆 > 5消 > 4消]:::sub
+    Expert --> Sim[輕量模擬]:::sub
+    Sim --> Physics[物理掉落預判]:::sub
+
+    %% 訓練架構細節
+    Train --> Multi[多核心處理]:::sub
+    Multi --> MP[Multiprocessing<br>18 Workers]:::sub
+    Train --> Guide[引導式學習]:::sub
+    Guide --> Teacher[Teacher Forcing<br>專家介入]:::sub
+
+    %% UI 細節
+    UI --> Visual[視覺化]:::sub
+    Visual --> Tkinter[Tkinter GUI]:::sub
+    UI --> Control[控制模式]:::sub
+    Control --> Auto[AI 自動掛機]:::sub
+    Control --> Debug[死亡快照/提示]:::sub
+```
+---
+## 5. 訓練成果展示
 
 經過 1000 萬步 (約 24 小時) 的訓練，AI 展現出了驚人的策略演化：
 
@@ -211,7 +284,7 @@ $$L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min(r_t(\theta)\hat{A}_t, \text{
 
 ---
 
-## 5. 如何執行
+## 6. 如何執行
 
 ### 環境需求
 * Python 3.8+
