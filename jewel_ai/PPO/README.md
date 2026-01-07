@@ -160,8 +160,10 @@ $$L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min(r_t(\theta)\hat{A}_t, \text{
 
 ### 📈 訓練曲線
    * **loss曲線**
-![loss](img/loss曲線.png)
-> **圖片說明** :依照圖片可以發現loss逐漸往下收斂
+     
+      ![loss](img/loss曲線.png)
+     
+      > **圖片說明** :依照圖片可以發現loss逐漸往下收斂
 ### 🎥 實際遊玩演示 (GIF)
 *(此處可插入 `gui_simulator.py` 錄製的 AI 遊玩 GIF)*
 
