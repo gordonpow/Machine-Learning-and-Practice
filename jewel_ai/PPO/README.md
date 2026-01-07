@@ -1,4 +1,4 @@
-# 💎 Jewel Puzzle AI: 基於 PPO 的強化學習消除遊戲解題系統
+#  Jewel Puzzle AI: 基於 PPO 的強化學習消除遊戲解題系統
 
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-orange)
@@ -8,7 +8,7 @@
 
 ---
 
-## 📖 目錄
+##  目錄
 
 1.  [遊戲規則與環境](#1-遊戲規則與環境)
 2.  [PPO 演算法介紹](#2-ppo-演算法介紹)
@@ -26,7 +26,7 @@
 
 本專案模擬了一個經典的「橫向卷軸三消遊戲」(類似 Panel de Pon / Tetris Attack)。
 
-### 🎮 遊戲機制
+###  遊戲機制
 * **棋盤大小**：9 行 (Rows) x 6 列 (Cols)。
 * **寶石種類**：7 種普通顏色 + 1 種牆壁 (Wall)。
 * **初始棋盤**：一開始會有三排不可消去之隨機寶石，死亡後會自動回到初始狀態
@@ -60,7 +60,7 @@
   
   ![寶石互換](gif/遊戲規則/死亡條件.gif)
 
-### 🌟 環境挑戰
+###  環境挑戰
 這是一個**部分可觀測 (Partially Observable)** 且 **隨機性極高** 的環境：
 1.  **隨機牆壁**：底部會隨機生成無法移動的牆壁，擠壓生存空間。
 2.  **連鎖預測**：AI 必須學會「預判」掉落後的盤面，而不僅僅是看眼前的消除。
@@ -98,7 +98,7 @@ $$L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min(r_t(\theta)\hat{A}_t, \text{
 
 我們使用了一個共享卷積骨幹 (CNN Backbone) 的 Actor-Critic 架構，並設計了專門的 One-Hot 輸入層來處理遊戲盤面。
 
-#### 📊 輸入層設計 (One-Hot Encoding Table)
+####  輸入層設計 (One-Hot Encoding Table)
 原始盤面是 9x6 的整數矩陣（每個格子儲存寶石 ID），我們將其轉換為 **10 層通道 (Channels)** 的 One-Hot 格式。這意味著棋盤狀態被拆解為 **0 與 1 的二進位矩陣**，每一層都代表一種特定的寶石類型或特殊狀態。這樣做能讓 CNN 清楚區分不同的物件屬性，而非將 ID 視為連續數值。
 
 | 通道索引 (Channel) | 代表物件 | 說明 |
@@ -118,7 +118,7 @@ $$L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min(r_t(\theta)\hat{A}_t, \text{
 
 ![圖片範例](img/CNN_layer展示.png)
 > **圖片說明** :紅色方框依照定義是Empty (空) 所對應位置的值就是1；綠色圓圈依照定義為Red Gem(紅色寶石)其 所對應位置的值就是1
-#### 🧠 CNN 網路架構 (Network Architecture)
+####  CNN 網路架構 (Network Architecture)
 模型採用 3 層卷積層提取局部特徵，並引入 **Self-Attention** 機制來捕捉全域的連鎖關係。
 
 | 層級 (Layer) | 輸入形狀 (Input Shape) | 操作 (Operation) | 輸出形狀 (Output Shape) | 說明 |
@@ -287,7 +287,7 @@ graph TD
 
 經過 1000 萬步 (約 24 小時) 的訓練，AI 展現出了驚人的策略演化：
 
-### 📈 訓練曲線
+###  訓練曲線
    * **loss曲線**
      
       ![loss](img/loss曲線.png)
@@ -311,7 +311,7 @@ graph TD
 
 
 
-### 🎥 實際遊玩演示 (GIF)
+###  實際遊玩演示 (GIF)
 
 ![訓練成果](gif/訓練成果/最終成果.gif)
 
