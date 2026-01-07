@@ -156,7 +156,7 @@ $$L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min(r_t(\theta)\hat{A}_t, \text{
 ## 4. Breakdown
  ![breakdown](img/breakdown.png)
 ---
-# Jewel Puzzle AI 系統架構
+## 5. Jewel Puzzle AI 系統架構
 
 這是我專案的系統架構圖：
 
@@ -218,7 +218,8 @@ graph TD
     Control --> Debug[死亡快照/提示]:::sub
 ```
 ---
-## 5. 訓練成果展示
+
+## 7. 訓練成果展示
 
 經過 1000 萬步 (約 24 小時) 的訓練，AI 展現出了驚人的策略演化：
 
@@ -243,7 +244,46 @@ graph TD
      
 
 ---
+## 6. API 規格說明 (API Specification)
 
+本專案核心模組的詳細 API 介面說明。
+
+### 1. 神經網路模型 (Neural Network)
+**檔案名稱：** `ActorCritic_Multitasking.py`
+負責處理視覺特徵提取與決策生成的深度學習模型。
+
+| 項目 | 說明 |
+| :--- | :--- |
+| **類別名稱** | `Match3ActorCritic(nn.Module)` |
+| **輸入 (Input)** | **狀態張量 (State Tensor)** <br> - 形狀：`(Batch_Size, 10, 9, 6)` <br> - 內容：前 9 層為寶石 One-Hot 編碼，第 10 層為 Action Mask。 |
+| **輸出 (Output)** | **1. 動作分佈 (Action Logits)** <br> - 形狀：`(Batch_Size, 54)` <br> - 說明：對應 54 種離散動作的未歸一化機率。<br><br>**2. 狀態價值 (State Value)** <br> - 形狀：`(Batch_Size, 1)` <br> - 說明：預測當前盤面的獲勝機率或預期得分。 |
+| **核心參數** | - `input_shape`: `(10, 9, 6)` <br> - `num_actions`: `54` (53種交換 + 1種上傳) |
+| **主要方法** | - `forward()`: (未實作，主要使用 act/evaluate) <br> - `act(state, mask)`: 推論模式，回傳動作與 Log Prob。 <br> - `evaluate(state, action)`: 訓練模式，回傳 Log Prob, Value 與 Entropy。 |
+| **架構特點** | - **CNN Backbone**: 3 層卷積層提取局部紋理。 <br> - **Self-Attention**: 計算全域關聯矩陣 (N, N)，捕捉遠距離連鎖特徵。 |
+
+### 2. PPO 代理 (Reinforcement Learning Agent)
+**檔案名稱：** `PPO_Agent_Multitasking.py`
+負責與環境互動、收集數據並執行 PPO 演算法更新的代理人。
+
+| 項目 | 說明 |
+| :--- | :--- |
+| **類別名稱** | `PPOAgent` |
+| **輸入 (Input)** | **環境觀測值 (Observation)** <br> - 格式：Numpy Array `(10, 9, 6)` 或 Tensor |
+| **輸出 (Output)** | **決策動作 (Action)** <br> - 格式：整數 `int` (範圍 0~53) <br> - 說明：直接對應環境的具體操作。 |
+| **核心參數** | - `lr`: 學習率 (搭配 Scheduler 使用) <br> - `gamma`: 折扣因子 (預設 0.99) <br> - `eps_clip`: PPO 截斷範圍 (預設 0.2) <br> - `k_epochs`: 每次更新的循環次數 (預設 4) |
+| **主要方法** | - `select_action(state)`: 將狀態轉為 Tensor 並從策略網路採樣動作。 <br> - `update()`: 取出 Buffer 中的軌跡數據，計算 Advantage 並執行梯度下降更新。 |
+
+### 3. 遊戲環境 (Environment)
+**檔案名稱：** `GAME_jewel_env_blacklist.py`
+遵循 OpenAI Gym 介面的遊戲模擬器，負責邏輯運算與物理模擬。
+
+| 項目 | 說明 |
+| :--- | :--- |
+| **類別名稱** | `JewelEnv(gym.Env)` |
+| **輸入 (Input)** | **動作指令 (Action ID)** <br> - 格式：整數 `int` <br> - 說明：0~52 為交換動作，53 為 Upload (上推)。 |
+| **輸出 (Output)** | **1. 下一狀態 (Next Obs)**: `(10, 9, 6)` One-Hot 矩陣 <br> **2. 獎勵 (Reward)**: 浮點數 (基於消除數、連鎖、破牆給分) <br> **3. 結束訊號 (Done)**: 布林值 (是否 Game Over) <br> **4. 資訊 (Info)**: 字典 (包含 Combo 數、消除細節) |
+| **核心參數** | - `reward_mode`: `"advanced"` (推薦使用進階獎勵) <br> - `wall_timer`: 隨機牆壁生成的倒數計時器 |
+| **主要方法** | - `step(action)`: 執行一步模擬，包含交換、消除、掉落、生成牆壁。 <br> - `reset()`: 重置棋盤，隨機生成初始局面。 <br> - `render()`: (選用) 視覺化當前盤面。 |
 
 
 ### 🎥 實際遊玩演示 (GIF)
@@ -273,7 +313,7 @@ graph TD
 
 ---
 
-## 6. 如何執行
+## 8. 如何執行
 
 ### 環境需求
 * Python 3.8+
