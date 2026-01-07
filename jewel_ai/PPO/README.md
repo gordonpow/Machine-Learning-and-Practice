@@ -18,7 +18,7 @@
     * [自適應 PPO 機制](#33-自適應-ppo-機制-adaptive-mechanism)
 4.  [Breakdown](#4-Breakdown)
 5.  [系統架構](#5-Jewel-Puzzle-AI-系統架構)
-6.  [API](#6-API-規格說明 (API Specification))
+6.  [API](#6-API-規格說明-(API-Specification))
     * [神經網路模型](#61-神經網路模型-(Neural-Network))
     
 8.  [訓練成果展示](#4-訓練成果展示)
