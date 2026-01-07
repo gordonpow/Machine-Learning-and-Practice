@@ -177,7 +177,11 @@ $$L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min(r_t(\theta)\hat{A}_t, \text{
 
      > **圖片說明** :依照圖片可以發現每步平均分數逐漸上升
      
-     
+
+---
+
+
+
 ### 🎥 實際遊玩演示 (GIF)
 
 ![訓練成果](gif/訓練成果/最終成果.gif)
