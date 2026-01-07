@@ -140,16 +140,7 @@ $$L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min(r_t(\theta)\hat{A}_t, \text{
 * 主進程收集 18 個環境的 `(State, Reward, Done)`，打包成 Batch 送入 GPU 訓練。
 * 這讓訓練速度提升了約 **15 倍**。
 
-### 3.3 啟發式引導 (Teacher Forcing)
-在訓練初期，AI 只是隨機亂動，很難學會「消除」這個稀疏獎勵 (Sparse Reward)。
-我們引入了一個基於 BFS (廣度優先搜索) 的 **Solver (專家系統)**：
-1.  **Solver** 會計算當前盤面是否存在 3消、4消或破牆機會。
-2.  在收集數據時，AI 有 **10% 的機率 (Teacher Forcing Rate)** 會被強制執行 Solver 建議的動作。
-3.  如果 AI 自己選的動作跟 Solver 一樣，我們會給予額外的 **專家獎勵 (Expert Bonus)**。
-
-這就像是教練手把手教 AI 下棋，讓它快速度過初期的迷茫階段。
-
-### 3.4 自適應 PPO 機制 (Adaptive Mechanism)
+### 3.3 自適應 PPO 機制 (Adaptive Mechanism)
 為了確保模型在長時間訓練下的穩定性，我們實作了 **自適應學習率 (ReduceLROnPlateau)**。系統會持續監控「平均分數」，當 AI 進步停滯時自動降低學習率，進行更精細的優化。
 
 ---
