@@ -207,19 +207,10 @@ graph TD
     Opt --> PPO[PPO Clip Update]:::sub
     Opt --> LR[自適應學習率<br>ReduceLROnPlateau]:::sub
 
-    %% 專家系統細節
-    Expert --> Search[搜尋演算法]:::sub
-    Search --> BFS[BFS / Beam Search]:::sub
-    Expert --> Heuristic[啟發式評估]:::sub
-    Heuristic --> Tactics[戰術分析<br>破牆 > 5消 > 4消]:::sub
-    Expert --> Sim[輕量模擬]:::sub
-    Sim --> Physics[物理掉落預判]:::sub
 
     %% 訓練架構細節
     Train --> Multi[多核心處理]:::sub
     Multi --> MP[Multiprocessing<br>18 Workers]:::sub
-    Train --> Guide[引導式學習]:::sub
-    Guide --> Teacher[Teacher Forcing<br>專家介入]:::sub
 
     %% UI 細節
     UI --> Visual[視覺化]:::sub
