@@ -1,4 +1,3 @@
-
 # 💎 Jewel Puzzle AI: 基於 PPO 的強化學習消除遊戲解題系統
 
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
@@ -14,10 +13,10 @@
 1.  [遊戲規則與環境](#1-遊戲規則與環境)
 2.  [PPO 演算法介紹](#2-ppo-演算法介紹)
 3.  [系統架構與訓練設計](#3-系統架構與訓練設計)
-    * [神經網路模型](#31-神經網路模型-match3actorcritic)
+    * [神經網路模型 (CNN + Attention)](#31-神經網路模型-match3actorcritic)
     * [多核心並行訓練](#32-多核心並行訓練-subprocvecenv)
     * [啟發式引導 (Teacher Forcing)](#33-啟發式引導-teacher-forcing)
-    * [自適應 PPO 機制 (Adaptive Mechanism)](#34-自適應-ppo-機制-adaptive-mechanism)
+    * [自適應 PPO 機制](#34-自適應-ppo-機制-adaptive-mechanism)
 4.  [訓練成果展示](#4-訓練成果展示)
 5.  [如何執行](#5-如何執行)
 
@@ -74,18 +73,42 @@ $$L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min(r_t(\theta)\hat{A}_t, \text{
 為了讓 AI 能夠學會如此複雜的遊戲，我們設計了一套完整的訓練系統。
 
 ### 3.1 神經網路模型 (Match3ActorCritic)
-我們使用了一個共享卷積骨幹 (CNN Backbone) 的 Actor-Critic 架構：
 
-1.  **輸入層 (Input)**：
-    * 形狀：`(10, 9, 6)`
-    * 前 9 層：One-hot 編碼的寶石盤面。
-    * 第 10 層：**無效動作遮罩 (Action Mask)**，告訴 AI 哪些位置剛交換過不能再動。
-2.  **特徵提取 (CNN + Attention)**：
-    * 3 層卷積層 (Conv2d) 提取局部特徵。
-    * **自注意力機制 (Self-Attention)**：讓模型能關注全域資訊（例如：底部的消除如何影響頂部的結構）。
-3.  **輸出層 (Heads)**：
-    * **Actor**：輸出每個動作的機率分佈 (Softmax)。
-    * **Critic**：預測當前盤面的價值 (Value)。
+我們使用了一個共享卷積骨幹 (CNN Backbone) 的 Actor-Critic 架構，並設計了專門的 One-Hot 輸入層來處理遊戲盤面。
+
+#### 📊 輸入層設計 (One-Hot Encoding Table)
+原始盤面是 9x6 的整數矩陣，我們將其轉換為 **10 層通道 (Channels)** 的 One-Hot 格式，以便 CNN 能夠區分不同的寶石類型與特殊狀態。
+
+| 通道索引 (Channel) | 代表物件 | 說明 |
+| :---: | :--- | :--- |
+| **0** | Empty (空) | 代表該位置為空氣 (0) |
+| **1** | Red Gem | 紅色寶石 (1) |
+| **2** | Blue Gem | 藍色寶石 (2) |
+| **3** | Green Gem | 綠色寶石 (3) |
+| **4** | Yellow Gem | 黃色寶石 (4) |
+| **5** | Purple Gem | 紫色寶石 (5) |
+| **6** | Orange Gem | 橘色寶石 (6) |
+| **7** | Cyan Gem | 青色寶石 (8) |
+| **8** | Wall (牆壁) | 該位置為牆壁 (7)，無法移動 |
+| **9** | **Action Mask** | **無效動作遮罩** (剛交換過的位置標記為 1) |
+
+> **設計理念**：將牆壁 (Wall) 與 Mask 獨立成單獨的通道，能讓卷積層更輕易地學會「牆壁不能動」以及「不要重複操作同一格」的規則。
+
+#### 🧠 CNN 網路架構 (Network Architecture)
+模型採用 3 層卷積層提取局部特徵，並引入 **Self-Attention** 機制來捕捉全域的連鎖關係。
+
+| 層級 (Layer) | 輸入形狀 (Input Shape) | 操作 (Operation) | 輸出形狀 (Output Shape) | 說明 |
+| :--- | :--- | :--- | :--- | :--- |
+| **Input** | `(10, 9, 6)` | - | - | 10 層 One-Hot 盤面 |
+| **Conv1** | `(10, 9, 6)` | Conv2d(3x3, 32) + ReLU | `(32, 9, 6)` | 提取基礎紋理特徵 |
+| **Conv2** | `(32, 9, 6)` | Conv2d(3x3, 64) + ReLU | `(64, 9, 6)` | 提取高階特徵 (如形狀) |
+| **Conv3** | `(64, 9, 6)` | Conv2d(3x3, 64) + ReLU | `(64, 9, 6)` | 加深特徵表達 |
+| **Attention**| `(64, 9, 6)` | **Self-Attention** | `(64, 9, 6)` | **捕捉全域連鎖與空間關係** |
+| **Flatten** | `(64, 9, 6)` | Flatten | `(3456)` | 展平為向量 |
+| **FC (Actor)** | `(3456)` | Linear(512) + ReLU | `(Action Dim)` | 輸出動作機率分佈 |
+| **FC (Critic)**| `(3456)` | Linear(512) + ReLU | `(1)` | 輸出盤面價值 (Value) |
+
+> **Self-Attention 的作用**：在消除遊戲中，底部的消除往往會引發頂部的掉落。傳統 CNN 的感受野 (Receptive Field) 有限，難以關聯相距較遠的方塊。Attention 機制允許模型「關注」盤面上任意兩個位置的關聯，從而學會預判連鎖。
 
 ### 3.2 多核心並行訓練 (SubprocVecEnv)
 單一環境的採樣速度太慢，我們使用 `multiprocessing` 開啟 **18 個並行環境**：
@@ -100,16 +123,8 @@ $$L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min(r_t(\theta)\hat{A}_t, \text{
 2.  在收集數據時，AI 有 **10% 的機率 (Teacher Forcing Rate)** 會被強制執行 Solver 建議的動作。
 3.  如果 AI 自己選的動作跟 Solver 一樣，我們會給予額外的 **專家獎勵 (Expert Bonus)**。
 
-這就像是教練手把手教 AI 下棋，讓它快速度過初期的迷茫階段。
-
 ### 3.4 自適應 PPO 機制 (Adaptive Mechanism)
-為了確保模型在長時間訓練下的穩定性與收斂效果，我們對標準 PPO 進行了自適應改進：
-
-1.  **自適應學習率 (Adaptive Learning Rate)**：
-    我們實作了 `ReduceLROnPlateau` 排程器。系統會持續監控「平均分數 (Average Score)」。當 AI 的進步停滯時（Patience=500），系統會自動將學習率降低（Factor=0.5），讓模型能夠進行更精細的權重調整，避免在最佳解附近震盪。
-
-2.  **KL 散度監控 (KL Divergence Monitoring)**：
-    在每次 PPO 更新時，我們會計算新舊策略之間的 **近似 KL 散度 (Approximate KL)**。這是一個關鍵指標，用來衡量新策略偏離舊策略的程度。如果 KL 值過高，代表更新步伐太大，可能導致訓練不穩定。透過監控此數值，我們能確保 PPO 始終在安全的信任區域 (Trust Region) 內進行優化。
+為了確保模型在長時間訓練下的穩定性，我們實作了 **自適應學習率 (ReduceLROnPlateau)**。系統會持續監控「平均分數」，當 AI 進步停滯時自動降低學習率，進行更精細的優化。
 
 ---
 
