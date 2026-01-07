@@ -15,7 +15,6 @@
 3.  [系統架構與訓練設計](#3-系統架構與訓練設計)
     * [神經網路模型 (CNN + Attention)](#31-神經網路模型-match3actorcritic)
     * [多核心並行訓練](#32-多核心並行訓練-subprocvecenv)
-    * [啟發式引導 (Teacher Forcing)](#33-啟發式引導-teacher-forcing)
     * [自適應 PPO 機制](#34-自適應-ppo-機制-adaptive-mechanism)
 4.  [訓練成果展示](#4-訓練成果展示)
 5.  [如何執行](#5-如何執行)
