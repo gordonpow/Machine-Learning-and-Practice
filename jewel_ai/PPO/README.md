@@ -94,6 +94,8 @@ $$L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min(r_t(\theta)\hat{A}_t, \text{
 
 > **設計理念**：將牆壁 (Wall) 與 Mask 獨立成單獨的通道，能讓卷積層更輕易地學會「牆壁不能動」以及「不要重複操作同一格」的規則。
 
+![圖片範例](img/CNN_layer展示.png)
+> **圖片說明** :紅色方框依照定義是Empty (空) 所對應位置的值就是1；綠色圓圈依照定義為Red Gem(紅色寶石)其 所對應位置的值就是1
 #### 🧠 CNN 網路架構 (Network Architecture)
 模型採用 3 層卷積層提取局部特徵，並引入 **Self-Attention** 機制來捕捉全域的連鎖關係。
 
